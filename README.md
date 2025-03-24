@@ -57,7 +57,7 @@ A deployed version of this application is available and actively running. For ac
 
 **Kaushik Naidu**  
 GitHub: [Kai309](https://github.com/Kai309)  
-LinkedIn: [linkedin.com/in/your-profile](https://www.linkedin.com/in/kaushik-naidu/)
+LinkedIn: [Kaushik Naidu](https://www.linkedin.com/in/kaushik-naidu/)
 
 ## License
 
