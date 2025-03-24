@@ -4,7 +4,7 @@ import numpy as np
 import os
 
 # Load API Key from environment variable
-TIINGO_API_KEY = os.getenv("TIINGO_API_KEY", "1a5aed77244ad222d7b682fa7bfbb59e2a6020a5")
+TIINGO_API_KEY = os.getenv("TIINGO_API_KEY", "")
 
 def get_tiingo_stock_data(ticker, start_date="2023-01-01", end_date="2024-12-31"):
     """
