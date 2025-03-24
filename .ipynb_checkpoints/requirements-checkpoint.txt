@@ -1,0 +1,9 @@
+Flask
+requests
+pandas
+numpy
+scikit-learn
+tensorflow
+arch
+gunicorn  # For deployment (Render/Heroku)
+python-dotenv  # Optional: if using .env for API keys

@@ -1,0 +1,9 @@
+Flask
+gunicorn
+requests
+pandas
+numpy
+scikit-learn
+tensorflow
+arch
+python-dotenv
