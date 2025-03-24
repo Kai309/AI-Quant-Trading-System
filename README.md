@@ -1,45 +1,58 @@
 # 🧠 AI Quant Trading System
 
-A full-stack, interactive AI-based stock trading dashboard that forecasts stock prices, analyzes quantitative signals, and performs strategy backtesting — built entirely in Python with Flask and modern web technologies.
-
-> 📈 **Objective:** Empower users to make smarter trading decisions using AI-driven insights based on momentum, mean reversion, volatility, and LSTM-based forecasting.
+A full-stack AI-powered stock trading dashboard that combines deep learning, financial modeling, and backtesting — all inside an intuitive web interface. This project provides end-to-end automated trade recommendations, based on real-time data, user-defined risk levels, and advanced quantitative signals.
 
 ---
 
-## 🌟 Key Features
+## 📌 Project Overview
 
-- **📉 Stock Forecasting using LSTM:**  
-  Predicts future prices based on historical time series using deep learning.
+The **AI Quant Trading System** is designed to help investors and finance enthusiasts explore algorithmic trading through:
 
-- **📊 Quantitative Signal Engine:**  
-  Calculates momentum, mean reversion (Z-score), and GARCH volatility for trading signal generation.
+- 📈 **LSTM-based price forecasting**
+- 🔁 **Mean reversion and momentum indicators**
+- 📉 **GARCH volatility modeling**
+- 🧪 **Backtesting with performance metrics**
+- 🎛️ **User-defined investment inputs**
+- 💻 **Flask-powered interactive dashboard**
 
-- **🛠️ Backtesting Framework:**  
-  Simulates trading with buy/sell/stop logic and reports Sharpe Ratio, drawdown, and final return.
-
-- **💡 Stock Filtering by Risk Level:**  
-  Auto-selects stocks based on volatility for Low, Medium, or High risk preferences.
-
-- **🖥️ Intuitive Frontend Dashboard:**  
-  Interactive UI using Flask + Chart.js with historical, forecast, and backtest chart modes.
-
-- **📊 Real-Time Metrics Displayed:**  
-  Mean Squared Error, MAE, R² Score for forecast performance  
-  Sharpe Ratio & Max Drawdown for strategy performance
+It serves as a foundational quant research tool and a portfolio-worthy full-stack machine learning application.
 
 ---
 
-## 🧠 Models & Techniques Used
+## 🚀 Features & Methodologies
 
-| Category | Technique | Purpose |
-|---------|-----------|---------|
-| Forecasting | LSTM (Keras) | Multi-step time series prediction |
-| Technical Signals | Momentum | Trend direction (price % change over window) |
-| Mean Reversion | Z-score | Identifies deviation from average (entry signal) |
-| Volatility Modeling | GARCH (ARCH Package) | Estimates risk & price variance |
-| Backtesting | Price Simulation | Calculates return, Sharpe Ratio, drawdown |
+### 1. 🔮 LSTM Forecasting
+- Uses `TensorFlow/Keras` to train a Long Short-Term Memory (LSTM) neural network on historical prices.
+- Predicts multi-step future stock prices (10 days).
+- Visualizes predictions vs. actuals, and computes MSE, MAE, and R².
+
+### 2. 📊 Quantitative Signal Engine
+- **Momentum (% change)**: Measures recent price direction.
+- **Mean Reversion (Z-Score)**: Flags overbought/oversold conditions.
+- **Volatility (GARCH)**: Models time-varying volatility using the `arch` package.
+
+### 3. 🛠️ Backtesting Engine
+- Simulates buy/sell/stop-loss logic from the suggested strategy.
+- Outputs: final return, Sharpe ratio, max drawdown, holding period.
+- Fully visualized on a chart with PnL trend.
+
+### 4. 📉 Risk-Based Stock Selection
+- Users select risk preference: Low / Medium / High.
+- System auto-chooses stock based on recent volatility (std. dev of returns).
 
 ---
 
-## 📂 Project Structure
+## 🖼️ Screenshots
+
+### 🎯 Dashboard Overview
+![UI Screenshot 1](https://github.com/Kai309/AI-Quant-Trading-System/blob/main/ss1.jpg)
+
+### 📈 Forecast Mode with LSTM
+![Forecast Screenshot](https://github.com/Kai309/AI-Quant-Trading-System/blob/main/ss2.jpg)
+
+### 🧪 Backtest Results with PnL & Metrics
+![Backtest Screenshot](https://github.com/Kai309/AI-Quant-Trading-System/blob/main/ss3.jpg)
+
+---
+
 
