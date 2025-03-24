@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Stock Trading System</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: black;
+    }
+    .header {
+      background-color: #03a5fc;
+      color: white;
+      padding: 15px;
+      font-size: 24px;
+      font-weight: bold;
+      text-align: center;
+    }
+    .container {
+      display: flex;
+      width: 90%;
+      margin: 20px auto;
+      gap: 20px;
+    }
+    .left-section {
+      width: 40%;
+      background: white;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+      border-radius: 10px;
+    }
+    .right-section {
+      width: 60%;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .box {
+      background: #03a5fc;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 18px;
+    }
+    label {
+      font-size: 18px;
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 10px;
+      margin: 5px 0;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: white;
+      color: black;
+    }
+    input[type="submit"], button {
+      background-color: #03a5fc;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 18px;
+      margin-top: 15px;
+      padding: 10px 20px;
+      border-radius: 5px;
+    }
+    input[type="submit"]:hover, button:hover {
+      background-color: #0284c7;
+    }
+    canvas {
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      max-height: 400px;
+    }
+    .prediction-results {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      text-align: left;
+      color: black;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    }
+    .prediction-results p {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="header">AI Quant Trading System - By Kaushik Naidu</div>
+
+<div class="container">
+  <div class="left-section">
+    <h2>Enter Investment Details</h2>
+    <form id="investmentForm">
+      <label>Investment Amount ($):</label>
+      <input type="number" name="investment" required>
+
+      <label>Risk Level:</label>
+      <select name="risk">
+        <option value="low">Low</option>
+        <option value="medium">Medium</option>
+        <option value="high">High</option>
+      </select>
+
+      <label>Expected Profit ($):</label>
+      <input type="number" name="expected_profit" required>
+
+      <input type="submit" value="Submit">
+    </form>
+  </div>
+
+  <div class="right-section">
+    <div class="box">
+      <h3>Stock Charts</h3>
+      <div style="margin-bottom: 10px;">
+        <button onclick="showChart('historical')">📈 Historical</button>
+        <button onclick="showChart('backtest')">🧪 Backtest</button>
+        <button onclick="showChart('prediction')">🔮 Forecast</button>
+      </div>
+      <canvas id="stockChart"></canvas>
+    </div>
+
+    <div class="box prediction-results">
+      <h3>Quantitative Trading Recommendation</h3>
+      <p><strong>Stock Selected:</strong> <span id="selected_stock">None</span></p>
+      <p><strong>Momentum:</strong> <span id="momentum_signal">-</span></p>
+      <p><strong>Mean Reversion (Z-Score):</strong> <span id="mean_reversion">-</span></p>
+      <p><strong>Volatility (GARCH):</strong> <span id="volatility_garch">-</span></p>
+      <p><strong>Suggested Buy Price:</strong> <span id="buy_price">$-</span></p>
+      <p><strong>Suggested Sell Price:</strong> <span id="sell_price">$-</span></p>
+      <p><strong>Stop Loss:</strong> <span id="stop_loss">$-</span></p>
+      <p><strong>Recommended Holding Period:</strong> <span id="holding_period">-</span></p>
+
+      <button onclick="runBacktest()">Run Backtest</button>
+      <p id="backtest_result" style="margin-top:10px; font-weight: bold;"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+let stockChart = null;
+let latestSignal = null;
+
+let chartData = {
+  historical: { labels: [], prices: [] },
+  backtest: { labels: [], prices: [] },
+  prediction: { labels: [], prices: [] }
+};
+
+function showChart(type) {
+  if (type === "prediction") {
+    if (!latestSignal) return;
+
+    fetch(`/forecast?stock=${latestSignal.stock}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          alert("Forecast Error: " + data.error);
+          return;
+        }
+
+        const ctx = document.getElementById("stockChart").getContext("2d");
+        if (stockChart) stockChart.destroy();
+
+        const forecastDates = data.forecast_dates || [];
+        const forecastPrices = data.forecast_prices || [];
+        const actualPrices = data.actual_prices || [];
+
+        stockChart = new Chart(ctx, {
+          type: "line",
+          data: {
+            labels: forecastDates,
+            datasets: [
+              {
+                label: "🔮 Forecast",
+                data: forecastPrices,
+                borderColor: "green",
+                backgroundColor: "rgba(0,128,0,0.1)",
+                borderDash: [5, 5],
+                borderWidth: 2,
+                fill: true,
+              },
+              {
+                label: "📉 Actual",
+                data: actualPrices,
+                borderColor: "gray",
+                backgroundColor: "rgba(128,128,128,0.1)",
+                borderWidth: 2,
+                fill: false,
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              tooltip: { mode: "index", intersect: false },
+              legend: { position: "top" }
+            },
+            scales: {
+              x: { title: { display: true, text: "Date" }},
+              y: { title: { display: true, text: "Price" }}
+            }
+          }
+        });
+
+        let metricDiv = document.getElementById("forecast_metrics");
+        if (!metricDiv) {
+          metricDiv = document.createElement("p");
+          metricDiv.id = "forecast_metrics";
+          metricDiv.style.marginTop = "10px";
+          metricDiv.style.fontWeight = "bold";
+          document.querySelector(".box").appendChild(metricDiv);
+        }
+
+        metricDiv.innerText = `Forecast Accuracy → MSE: ${data.mse ?? 0} | MAE: ${data.mae ?? 0} | R²: ${data.r2 ?? 0}`;
+      })
+      .catch(err => {
+        console.error("Error loading forecast:", err);
+      });
+  } else {
+    plotStockChart(type);
+  }
+}
+
+async function fetchStockSignals(formData) {
+  try {
+    const response = await fetch("/get_stock_signals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+
+    const data = await response.json();
+    if (data.error) {
+      alert("Error: " + data.error);
+      return;
+    }
+
+    latestSignal = data;
+
+    document.getElementById("selected_stock").innerText = data.stock;
+    document.getElementById("momentum_signal").innerText = data.momentum;
+    document.getElementById("mean_reversion").innerText = data.mean_reversion;
+    document.getElementById("volatility_garch").innerText = data.volatility_garch;
+    document.getElementById("buy_price").innerText = "$" + data.strategy.buy_price;
+    document.getElementById("sell_price").innerText = "$" + data.strategy.sell_price;
+    document.getElementById("stop_loss").innerText = "$" + data.strategy.stop_loss;
+    document.getElementById("holding_period").innerText = data.strategy.holding_days || "-";
+
+    fetchStockPriceChart(data.stock);
+  } catch (error) {
+    console.error("Error fetching stock signals:", error);
+  }
+}
+
+async function fetchStockPriceChart(stock) {
+  try {
+    const response = await fetch(`/get_stock_data?ticker=${stock}`);
+    const data = await response.json();
+
+    if (data.error) {
+      alert("Chart error: " + data.error);
+      return;
+    }
+
+    const labels = data.map(d => d.date);
+    const prices = data.map(d => d.price);
+
+    chartData.historical.labels = labels;
+    chartData.historical.prices = prices;
+
+    showChart("historical");
+  } catch (error) {
+    console.error("Error loading chart:", error);
+  }
+}
+
+function plotStockChart(mode) {
+  const ctx = document.getElementById("stockChart").getContext("2d");
+  if (stockChart) stockChart.destroy();
+
+  const labels = chartData[mode].labels;
+  const prices = chartData[mode].prices;
+
+  stockChart = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: `${latestSignal?.stock} (${mode})`,
+        data: prices,
+        borderColor: "#4CAF50",
+        backgroundColor: "rgba(76, 175, 80, 0.1)",
+        borderWidth: 2,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { intersect: false, mode: "index" },
+      plugins: {
+        tooltip: {
+          backgroundColor: "rgba(0,0,0,0.7)",
+          bodyFont: { size: 14 },
+          titleFont: { size: 16, weight: "bold" }
+        },
+        legend: { position: "top" }
+      },
+      scales: {
+        x: { title: { display: true, text: "Date" }},
+        y: {
+          title: { display: true, text: "Price" },
+          suggestedMin: Math.min(...prices) * 0.9,
+          suggestedMax: Math.max(...prices) * 1.1
+        }
+      }
+    }
+  });
+}
+
+async function runBacktest() {
+  if (!latestSignal) return;
+
+  const response = await fetch("/backtest", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      stock: latestSignal.stock,
+      buy_price: latestSignal.strategy.buy_price,
+      sell_price: latestSignal.strategy.sell_price,
+      stop_loss: latestSignal.strategy.stop_loss
+    })
+  });
+
+  const result = await response.json();
+  if (result.error) {
+    document.getElementById("backtest_result").innerText = "Backtest Error: " + result.error;
+  } else {
+    document.getElementById("backtest_result").innerHTML =
+      `Backtest Result: ${result.result} | Final Price: $${result.exit_price} | Return: ${result.return_percent}%<br>` +
+      `Sharpe Ratio: ${result.sharpe_ratio ?? 0} | Max Drawdown: ${result.max_drawdown ?? 0}%`;
+
+    document.getElementById("holding_period").innerText = result.holding_days + " days";
+
+    chartData.backtest.labels = result.dates || [];
+    chartData.backtest.prices = result.prices || [];
+
+    showChart("backtest");
+  }
+}
+
+document.getElementById("investmentForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const formData = Object.fromEntries(new FormData(this));
+  fetchStockSignals(formData);
+});
+</script>
+
+</body>
+</html>
